@@ -30,10 +30,13 @@ def is_hex(color):
 
 
 def hex_to_rgb(palette):
-    palette_rgb = {}
-    for key in palette:
-        rgb = [int(palette[key][index : index + 2], 16) for index in range(1, 7, 2)]
-        palette_rgb[key] = rgb
+    palette_rgb = {
+        key: [int(value[index : index + 2], 16) for index in range(1, 7, 2)]
+        for key, value in palette.items()
+    }
+    # for key in palette:
+    #     rgb = [int(palette[key][index : index + 2], 16) for index in range(1, 7, 2)]
+    #     palette_rgb[key] = rgb
     return palette_rgb
 
 
