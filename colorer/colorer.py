@@ -1,7 +1,5 @@
 import yaml
-
-color_start = "\u001b[38;2;"
-color_reset = "\033[0m"
+from types import SimpleNamespace as simple_dict
 
 
 def fetch_palette(path):
@@ -20,7 +18,7 @@ def fetch_palette(path):
         elif not all(is_hex(color) for color in content["palette"].values()):
             raise Exception("Not hexadecimal")
         else:
-            return hex_to_rgb(content["palette"])
+            return simple_dict(**hex_to_rgb(content["palette"]))
 
 
 def is_hex(color):
@@ -39,18 +37,34 @@ def hex_to_rgb(palette):
     return palette_rgb
 
 
-def format_ansi(string: str, palette, color_base):
-    color_channels = palette[color_base]
-    rgb = f"{';'.join(map(str, color_channels))}"
-    return f"{color_start}{rgb}m{string}{color_reset}"
+def fg(color, string):
+    rgb = ";".join(map(str, color))
+    fg_start = f"\033[38;2;{rgb}m"
+    reset = "\033[0m"
+    color_fg = f"{fg_start}{string.replace(reset, reset + fg_start)}{reset}"
+    return color_fg
+
+
+def bg(color, string):
+    rgb = ";".join(map(str, color))
+    bg_start = f"\033[48;2;{rgb}m"
+    reset = "\033[0m"
+    color_bg = f"{bg_start}{string.replace(reset, reset + bg_start)}{reset}"
+    return color_bg
 
 
 def main():
     string = "▇▇▇▇▇▇▇▇▇▇"
-    palette = fetch_palette("./schemes/base24/gruvbox-dark.yaml")
-    for color in palette:
-        print(f"{color}: {palette[color]}")
-        print(format_ansi(string, palette, color))
+    p = fetch_palette("./schemes/base16/everforest-dark-hard.yaml")
+
+    print(
+        f"this is a {fg(p.base09, 'test')} of the {bg(p.base08, 'colorer')} including {fg(p.base0E, bg(p.base02, 'nested strings'))} and resets."
+    )
+    print(
+        f"this is {fg(p.base03, f'a longer nested test to see if something {bg(p.base08, "breaks")} with nested strings')} when used unconventionally"
+    )
+    for color in vars(p):
+        print(f"{color}: {fg(vars(p)[color], string)}")
 
 
 if __name__ == "__main__":
