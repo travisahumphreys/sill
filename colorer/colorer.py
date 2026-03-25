@@ -1,8 +1,18 @@
 import yaml
 from types import SimpleNamespace as simple_dict
 
+"""
+    colorer.py
+    ----------
+    See README for usage instructions.
 
-def fetch_palette(path):
+    Makes use of pyyaml for color parsing, and SimpleNamespace to clean up the syntax for calling colors
+"""
+
+
+def fetch_palette(path: str):
+    # Loads, parses and verifies the palette from the YAML file
+    # Casts the resulting dict as a SimpleNamespace
     expected_schema = ["system", "name", "author", "variant", "palette"]
     with open(path) as file:
         content = yaml.safe_load(file)
@@ -21,7 +31,8 @@ def fetch_palette(path):
             return simple_dict(**hex_to_rgb(content["palette"]))
 
 
-def is_hex(color):
+def is_hex(color: str):
+    # Helper to verify that input colors are hexadecimal
     try:
         int(color[1:7], 16)
         return True
@@ -29,7 +40,8 @@ def is_hex(color):
         return False
 
 
-def hex_to_rgb(palette):
+def hex_to_rgb(palette: dict):
+    # Converts the colors from the palette to RGB for use in the ANSI escapes
     palette_rgb = {
         key: [int(value[index : index + 2], 16) for index in range(1, 7, 2)]
         for key, value in palette.items()
@@ -37,7 +49,7 @@ def hex_to_rgb(palette):
     return palette_rgb
 
 
-def fg(color, string):
+def fg(color: list, string: str):
     rgb = ";".join(map(str, color))
     fg_start = f"\033[38;2;{rgb}m"
     reset = "\033[0m"
@@ -45,7 +57,7 @@ def fg(color, string):
     return color_fg
 
 
-def bg(color, string):
+def bg(color: list, string: str):
     rgb = ";".join(map(str, color))
     bg_start = f"\033[48;2;{rgb}m"
     reset = "\033[0m"
